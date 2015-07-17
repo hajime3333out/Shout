@@ -4,8 +4,10 @@ define('__APP__', __DIR__ . '/..');
 
 require_once( __APP__ . "/config/app.php" );
 
-require_once( __APP__ . "/src/Shout.php" );
-require_once( __APP__ . "/src/Config.php" );
+function __autoload($class_name) {
+    include __APP__ . "/src/" . $class_name . '.php';
+}
+
 
 
 Router::action('GET', '/hello', function(){
