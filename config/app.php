@@ -17,7 +17,8 @@ return array(
         'width' => 640,
         'height' => 640,
         'font' => 1,
-        'color' => array(255,255,255),
-        'bgcolor' => array(0,0,0),
+        'color' => '#ffffff',
+        'bg_color' => 'transparent',
+        'delay' => 50
     ),
 );
