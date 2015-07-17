@@ -2,6 +2,10 @@
 
 return array(
 
+    'source_dir' => array(
+        ''
+    ),
+
     'font_dir' => __APP__ . '/fonts/',
 
     'font_filename' => array(
