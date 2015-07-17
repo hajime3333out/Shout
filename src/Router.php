@@ -38,7 +38,10 @@ class Router
         return self::$me;
     }
 
-    static function action($path, $function) {
+    static function action($method, $path, $function) {
+
+        if ( $method != $_SERVER['REQUEST_METHOD'] )
+            return false;
 
         $me = self::getInstance();
         if ( $me->is_called == true ) return false;
