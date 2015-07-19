@@ -1,0 +1,24 @@
+{
+    "name": "cinnamonlab/simple",
+    "description": "The Simple Framework.",
+    "type": "library",
+    "keywords": ["framework"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hajime Hotta",
+            "email": "hotta@fastbid.asia",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "cinnamonlab/framework": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+
+}
