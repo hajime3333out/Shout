@@ -1,9 +1,14 @@
 <?php
 
 use Framework\Route;
+use Framework\Response;
+use App\Shout;
 
-Route::action('GET', '/welcome', function(){
-    echo "welcome";
+
+mb_internal_encoding('UTF-8');
+
+Route::get('/', function(){
+    return (new Response())
+        ->setContentType('image/gif')
+        ->setContent(Shout::emptyImage());
 });
-
-Route::action('GET', '/hello', 'SampleController@hello');
