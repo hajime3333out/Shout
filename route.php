@@ -12,7 +12,7 @@ Route::get('/hello', function(){
         ->setContentType('image/gif')
         ->setContent(
             (new Shout())
-                ->drawSample(array("你","好"))
+                ->drawString("我喜歡你喔")
                 ->finalise() );
 });
 
