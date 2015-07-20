@@ -15,6 +15,7 @@ return array(
         'bg_color' => '#000000',
         'color' => '#ffffff',
         'width' => 640,
-        'height' => 640
+        'height' => 640,
+        'delay' => 50
     )
 );
