@@ -25,7 +25,7 @@ class Shout {
      */
     function __construct( $layer_number = 2, $setting = 'default' ) {
 
-        $this->setting = Config::get('app.' . $setting );
+        $this->setting = Config::get('image.' . $setting );
 
         $this->base_color = new ImagickPixel( $this->setting['bg_color'] );
         $this->draw_color = new ImagickPixel( $this->setting['color'] );
@@ -75,7 +75,10 @@ class Shout {
     static function emptyImage() {
         $output = new Imagick();
         $output->setFormat("gif");
-        $output->newImage(100,100,new ImagickPixel("black"));
+        $output->newImage(
+            Config::get('image.default.width'),
+            Config::get('image.default.height'),
+            new ImagickPixel(Config::get('image.default.bg_color')));
 
         return $output->getimagesblob();
 
