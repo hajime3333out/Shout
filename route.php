@@ -7,12 +7,6 @@ use App\Shout;
 
 mb_internal_encoding('UTF-8');
 
-Route::get('/', function(){
-    return (new Response())
-        ->setContentType('image/gif')
-        ->setContent(Shout::emptyImage());
-});
-
 Route::get('/hello', function(){
     return (new Response())
         ->setContentType('image/gif')
@@ -20,4 +14,10 @@ Route::get('/hello', function(){
             (new Shout())
                 ->drawSample(array("你","好"))
                 ->finalise() );
+});
+
+Route::get('/', function(){
+    return (new Response())
+        ->setContentType('image/gif')
+        ->setContent(Shout::emptyImage());
 });
