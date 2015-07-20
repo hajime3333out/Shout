@@ -62,7 +62,7 @@ class Shout {
 
         $text_array = $this->divideString($text);
 
-        for ( $i = 0; $i < count($this->layers) && $i < count($letters); $i++ ) {
+        for ( $i = 0; $i < count($this->layers) && $i < count($text_array); $i++ ) {
 
             $drawer = (new ImagickDraw());
             $drawer->setFont( __APP__ . $this->setting['font_base_dir']
@@ -73,6 +73,8 @@ class Shout {
                 $this->getProperFontSize($text_array, $drawer);
 
             $drawer->setfontsize($size);
+
+print_r(array("size"=>$size, 'text'=>$text_array));die;
 
             foreach( $text_array as $i => $text ) {
                 $metrics = $this->layers[0]
