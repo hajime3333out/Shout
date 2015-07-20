@@ -64,7 +64,7 @@ class Shout {
     static function emptyImage() {
         $output = new Imagick();
         $output->setFormat("gif");
-        $output->newImage(1,1,new ImagickPixel("black"));
+        $output->newImage(100,100,new ImagickPixel("black"));
 
         return $output->getimagesblob();
 
