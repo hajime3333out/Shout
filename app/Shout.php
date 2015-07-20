@@ -61,35 +61,36 @@ class Shout {
     function drawString( $text, $font = 0 ) {
 
         $text_array = $this->divideString($text);
+try { 
+        for ( $i = 0; $i < count($this->layers); $i++ ) {
+            list($size, $max_width, $height, $y) =
+                $this->getProperFontSize($text_array, $font);
 
-        for ( $i = 0; $i < count($this->layers) && $i < count($text_array); $i++ ) {
 
             $drawer = (new ImagickDraw());
-            $drawer->setFont( __APP__ . $this->setting['font_base_dir']
+            $drawer->setFont(  $this->setting['font_base_dir']
                 . '/' . $this->setting['font'][$font]);
             $drawer->setfillcolor($this->draw_color);
-
-            list($size, $max_width, $height, $y) =
-                $this->getProperFontSize($text_array, $drawer);
-
             $drawer->setfontsize($size);
 
-print_r(array("size"=>$size, 'text'=>$text_array));die;
 
-            foreach( $text_array as $i => $text ) {
+            foreach( $text_array as $j => $text ) {
                 $metrics = $this->layers[0]
                     ->queryFontMetrics($drawer, $text);
 
-                $width = $metrics['x2']-$metrics['x1'];
+                $width = $metrics['textWidth'];//'boundingBox']['x2']-$metrics['boundingBox']['x1'];
                 $x = (int)(($this->setting['width'] - $width)/2 - $metrics['x1']);
 
-                $drawer->annotation( 0, $y + $height * $i, $text );
+//print_r(array('width'=>$width, 'x'=>$x, 'y'=>$y));
+
+                $drawer->annotation( $x, $y + $height * $j, $text );
                 $this->layers[$i]->drawImage($drawer);
             }
 
-
         }
+//die;
         return $this;
+} catch ( Exception $e ) { print_r($e->getTrace()); die;}
     }
 
     /**
@@ -133,15 +134,20 @@ print_r(array("size"=>$size, 'text'=>$text_array));die;
         return $return;
     }
 
-    private function getProperFontSize( $texts, ImagickDraw $drawer ) {
+    private function getProperFontSize( $texts, $font ) {
 
         $this_size = $this->setting['width'];
         $this_height = 0;
         $this_width = 0;
         $this_y = 0;
+        $drawer = (new ImagickDraw());
+
+        $drawer->setFont( $this->setting['font_base_dir']
+            . '/' . $this->setting['font'][$font]);
+
+        $drawer->setfillcolor($this->draw_color);
 
         foreach( $texts as $text ) {
-
             for ( $size = $this_size;
                 $size > 20;
                 $size = (int) ($size * 0.9 ) ) {
@@ -151,26 +157,22 @@ print_r(array("size"=>$size, 'text'=>$text_array));die;
                 $metrics = $this->layers[0]
                     ->queryFontMetrics($drawer, $text);
 
-                $height = ($metrics['y2']-$metrics['y1']) * 1.1;
-                $width = $metrics['x2']-$metrics['x1'];
-                $y = (int)(($this->setting['width'] -
-                            $height * count($texts))/2) - $metrics['ascender'];
 
-                if ( $width < $this->setting['width'] * 0.90 && $y > 0 ) {
-                    $this_size = $size;
-                    $this_height = $height;
-                    $this_width = $width;
+                $height = $metrics['textHeight'] * 1.03;
+                $width = $metrics['textWidth'] * 1.1;
+                $y = (int)(($this->setting['width'] -
+                            $height * count($texts))/2) + $metrics['ascender'];
+
+                if ( $width < $this->setting['width'] && $y > 0 ) {
+                    $this_size = min($this_size, $size);
+                    $this_height = max($height, $this_height);
+                    $this_width = max( $width, $this_width);
                     $this_y = $y;
                     break;
                 }
             }
         }
 
-        return array(
-            'size' => $this_size,
-            'width'=>$this_width,
-            'height'=> $this_height,
-            'y' => $this_y
-        );
+        return array( $this_size, (int)$this_width, (int)$this_height, (int)$this_y );
     }
 } 
