@@ -37,6 +37,7 @@ class Shout {
                 $this->setting['width'],
                 $this->setting['height'],
                 $this->base_color );
+            $this->layers[$i]->setImageFormat('gif');
         }
     }
 
@@ -44,13 +45,14 @@ class Shout {
 
         for ( $i = 0; $i < count($this->layers) && $i < count($letters); $i++ ) {
             $drawer = (new ImagickDraw());
-            $drawer->setfontsize(24);
+            $drawer->setfontsize(50);
             $drawer->setFont( __APP__ . "/fonts/1new.ttf");
-            $drawer->setfillcolor($this->color);
+            $drawer->setfillcolor($this->draw_color);
             $metrics = $this->layers[$i]
                 ->queryFontMetrics($drawer, $letters[$i]);
             $drawer->annotation( 0, $metrics['ascender'], $letters[$i] );
             $this->layers[$i]->drawImage($drawer);
+
         }
         return $this;
     }
