@@ -5,7 +5,7 @@ namespace App;
 use Framework\Config;
 use Imagick;
 use ImagickPixel;
-
+use ImagickDraw;
 
 class Shout {
     private $layers;
@@ -37,10 +37,21 @@ class Shout {
                 $this->setting['width'],
                 $this->setting['height'],
                 $this->base_color );
-
-
         }
+    }
 
+    function drawSample( $letters ) {
+
+        for ( $i = 0; $i < count($this->layers) && $i < count($letters); $i++ ) {
+            $drawer = (new ImagickDraw());
+            $drawer->setfontsize(24);
+            $drawer->setFont( __APP__ . "/fonts/1new.ttf");
+            $metrics = $this->layers[$i]
+                ->queryFontMetrics($drawer, $letters[$i]);
+            $drawer->annotation( 0, $metrics['ascender'], $letters[$i] );
+            $this->layers[$i]->drawImage($drawer);
+        }
+        return $this;
     }
 
     /**
