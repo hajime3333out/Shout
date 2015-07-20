@@ -46,6 +46,7 @@ class Shout {
             $drawer = (new ImagickDraw());
             $drawer->setfontsize(24);
             $drawer->setFont( __APP__ . "/fonts/1new.ttf");
+            $drawer->setfillcolor($this->color);
             $metrics = $this->layers[$i]
                 ->queryFontMetrics($drawer, $letters[$i]);
             $drawer->annotation( 0, $metrics['ascender'], $letters[$i] );
