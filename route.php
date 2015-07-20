@@ -3,7 +3,7 @@
 use Framework\Route;
 use Framework\Response;
 use App\Shout;
-
+use \Framework\Input;
 
 mb_internal_encoding('UTF-8');
 
