@@ -12,3 +12,12 @@ Route::get('/', function(){
         ->setContentType('image/gif')
         ->setContent(Shout::emptyImage());
 });
+
+Route::get('/hello', function(){
+    return (new Response())
+        ->setContentType('image/gif')
+        ->setContent(
+            (new Shout())
+                ->drawSample(array("你","好"))
+                ->finalise() );
+});
