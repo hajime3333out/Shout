@@ -45,10 +45,10 @@ class Shout {
     function drawString( $text, $def = 1 ) {
 
         $text_array = $this->divideString($text);
-
         $definition = json_decode(
             file_get_contents($this->setting['font_base_dir'] . "/$def.def")
         );
+
         $font = $definition->base->font;
         list($size, $max_width, $height, $y)
             = $this->getProperFontSize($text_array, $font);
@@ -65,9 +65,8 @@ class Shout {
                 $this->layers[$i]->setImageFormat('gif');
             }
 */
-
             foreach( $definition->layers as $i => $commands ) {
-
+		$commands = get_object_vars($commands);
                 $layer = new Imagick();
                 $layer->newimage(
                     $this->setting['width'],
@@ -82,7 +81,6 @@ class Shout {
 
                 $drawer->setfillcolor($this->draw_color);
                 $drawer->setfontsize($size);
-
                 foreach($commands as $command => $value ) {
                     switch ( $command ) {
                         case 'color':
@@ -91,9 +89,7 @@ class Shout {
                             );
                             break;
                         case 'scale':
-                            $drawer->setFillColor(
-                                new ImagickPixel($value)
-                            );
+                            $drawer->setFontSize(  );
                             break;
                     }
                 }
@@ -116,19 +112,10 @@ class Shout {
                                 break;
                         }
                     }
-
                     $this->layers[$i] = $layer;
-
                 }
-
-
             }
-
-            for ( $i = 0; $i < count($this->layers); $i++ ) {
-
-
-
-            }
+//header('Content-type: image/gif'); echo $this->layers[$i]->getImagesBlob();die;
             return $this;
         } catch ( Exception $e ) {
             print_r($e->getTrace()); die;
