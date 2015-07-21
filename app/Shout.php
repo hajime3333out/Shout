@@ -23,74 +23,116 @@ class Shout {
      * @param int $layer_number
      * @param string $setting
      */
-    function __construct( $layer_number = 2, $setting = 'default' ) {
+    function __construct( $setting = 'default' ) {
 
         $this->setting = Config::get('image.' . $setting );
 
         $this->base_color = new ImagickPixel( $this->setting['bg_color'] );
         $this->draw_color = new ImagickPixel( $this->setting['color'] );
 
-        for ( $i = 0; $i < $layer_number; $i++ ) {
-            $this->layers[$i] = new Imagick();
+        $layer = new Imagick();
+        $layer->newimage(
+            $this->setting['width'],
+            $this->setting['height'],
+            $this->base_color
+        );
+        $layer->setimageformat('gif');
 
-            $this->layers[$i]->newImage(
-                $this->setting['width'],
-                $this->setting['height'],
-                $this->base_color );
-            $this->layers[$i]->setImageFormat('gif');
-        }
+        $this->layers = array( $layer );
+
     }
 
-
-    function drawSample( $letters ) {
-
-        for ( $i = 0; $i < count($this->layers) && $i < count($letters); $i++ ) {
-            $drawer = (new ImagickDraw());
-            $drawer->setfontsize(50);
-            $drawer->setFont( __APP__ . "/fonts/1new.ttf");
-            $drawer->setfillcolor($this->draw_color);
-            $metrics = $this->layers[$i]
-                ->queryFontMetrics($drawer, $letters[$i]);
-            $drawer->annotation( 0, $metrics['ascender'], $letters[$i] );
-            $this->layers[$i]->drawImage($drawer);
-
-        }
-        return $this;
-    }
-
-    function drawString( $text, $font = 0 ) {
+    function drawString( $text, $def = 1 ) {
 
         $text_array = $this->divideString($text);
-try { 
-        for ( $i = 0; $i < count($this->layers); $i++ ) {
-            list($size, $max_width, $height, $y) =
-                $this->getProperFontSize($text_array, $font);
+
+        $definition = json_decode(
+            file_get_contents($this->setting['font_base_dir'] . "/$def.def")
+        );
+        $font = $definition->base->font;
+        list($size, $max_width, $height, $y)
+            = $this->getProperFontSize($text_array, $font);
+
+        try {
+/*
+            for ( $i = 0; $i < $layer_number; $i++ ) {
+                $this->layers[$i] = new Imagick();
+
+                $this->layers[$i]->newImage(
+                    $this->setting['width'],
+                    $this->setting['height'],
+                    $this->base_color );
+                $this->layers[$i]->setImageFormat('gif');
+            }
+*/
+
+            foreach( $definition->layers as $i => $commands ) {
+
+                $layer = new Imagick();
+                $layer->newimage(
+                    $this->setting['width'],
+                    $this->setting['height'],
+                    $this->base_color
+                );
+                $layer->setimageformat('gif');
+
+                $drawer = (new ImagickDraw());
+                $drawer->setFont(  $this->setting['font_base_dir']
+                    . '/' . $this->setting['font'][$font]);
+
+                $drawer->setfillcolor($this->draw_color);
+                $drawer->setfontsize($size);
+
+                foreach($commands as $command => $value ) {
+                    switch ( $command ) {
+                        case 'color':
+                            $drawer->setFillColor(
+                                new ImagickPixel($value)
+                            );
+                            break;
+                        case 'scale':
+                            $drawer->setFillColor(
+                                new ImagickPixel($value)
+                            );
+                            break;
+                    }
+                }
+
+                foreach( $text_array as $j => $text ) {
+                    $metrics = $layer->queryFontMetrics($drawer, $text);
+
+                    $width = $metrics['textWidth'];
+                    $x = (int)(($this->setting['width'] - $width)/2 - $metrics['x1']);
+
+                    //print_r(array('width'=>$width, 'x'=>$x, 'y'=>$y));
+
+                    $drawer->annotation( $x, $y + $height * $j, $text );
+                    $layer->drawImage($drawer);
+
+                    foreach($commands as $command => $value ) {
+                        switch ( $command ) {
+                            case 'corate':
+                                $layer->rotateimage($this->base_color, $value);
+                                break;
+                        }
+                    }
+
+                    $this->layers[$i] = $layer;
+
+                }
 
 
-            $drawer = (new ImagickDraw());
-            $drawer->setFont(  $this->setting['font_base_dir']
-                . '/' . $this->setting['font'][$font]);
-            $drawer->setfillcolor($this->draw_color);
-            $drawer->setfontsize($size);
-
-
-            foreach( $text_array as $j => $text ) {
-                $metrics = $this->layers[0]
-                    ->queryFontMetrics($drawer, $text);
-
-                $width = $metrics['textWidth'];//'boundingBox']['x2']-$metrics['boundingBox']['x1'];
-                $x = (int)(($this->setting['width'] - $width)/2 - $metrics['x1']);
-
-//print_r(array('width'=>$width, 'x'=>$x, 'y'=>$y));
-
-                $drawer->annotation( $x, $y + $height * $j, $text );
-                $this->layers[$i]->drawImage($drawer);
             }
 
+            for ( $i = 0; $i < count($this->layers); $i++ ) {
+
+
+
+            }
+            return $this;
+        } catch ( Exception $e ) {
+            print_r($e->getTrace()); die;
         }
-//die;
-        return $this;
-} catch ( Exception $e ) { print_r($e->getTrace()); die;}
     }
 
     /**

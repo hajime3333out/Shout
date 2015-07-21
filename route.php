@@ -9,11 +9,12 @@ mb_internal_encoding('UTF-8');
 
 Route::get('/hello', function(){
     $font = Input::get("font", 1);
+    $string = Input::get("你好", "");
     return (new Response())
         ->setContentType('image/gif')
         ->setContent(
             (new Shout())
-                ->drawString("我喜歡你喔", $font )
+                ->drawString($string, $font )
                 ->finalise() );
 });
 

@@ -1,0 +1,15 @@
+{
+    'base' => {
+        'font'=>1
+    },
+    'layers' => [
+        [
+            'scale'=>0.9,
+            'color'=>'#ffffff'
+        ],
+        [
+            'scale'=>1,
+            'color'=>'#ffffff'
+        ]
+    }
+}
