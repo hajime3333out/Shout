@@ -200,6 +200,8 @@ class Shout {
             }
         }
 
-        return array( $this_size, (int)$this_width, (int)$this_height, (int)$this_y );
+        $result =  array( $this_size, (int)$this_width, (int)$this_height, (int)$this_y );
+print_r($result); die;
+        return $result;
     }
 } 
