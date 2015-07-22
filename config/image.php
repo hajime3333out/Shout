@@ -12,7 +12,7 @@ return array(
             5 => '5new.ttf',
             6 => '6new.ttf',
         ),
-        'bg_color' => '#000000',
+        'bg_color' => 'none',
         'color' => '#ffffff',
         'width' => 320,
         'height' => 320,

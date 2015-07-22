@@ -1,14 +1,18 @@
 {
 	"base":{
-		"font":1
+		"font":5
 	},
 	"layers":[
 		{
-			"scale":0.9,
+			"scale":0.95,
+			"rotate": [-3, 0.5, 0.5], 
+                        "stroke-width": 3, "stroke-color":"#ff0000",
 			"color":"#ffffff"
 		},
 		{
 			"scale":1,
+                        "rotate": [3, 0.5, 0.5],
+                        "stroke-width": 3, "stroke-color":"#ff0000",
 			"color":"#ffffff"
 		}
 	]

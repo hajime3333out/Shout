@@ -54,17 +54,6 @@ class Shout {
             = $this->getProperFontSize($text_array, $font);
 
         try {
-/*
-            for ( $i = 0; $i < $layer_number; $i++ ) {
-                $this->layers[$i] = new Imagick();
-
-                $this->layers[$i]->newImage(
-                    $this->setting['width'],
-                    $this->setting['height'],
-                    $this->base_color );
-                $this->layers[$i]->setImageFormat('gif');
-            }
-*/
             foreach( $definition->layers as $i => $commands ) {
 		$commands = get_object_vars($commands);
                 $layer = new Imagick();
@@ -81,6 +70,7 @@ class Shout {
 
                 $drawer->setfillcolor($this->draw_color);
                 $drawer->setfontsize($size);
+                $dx = 0; $dy = 0;
                 foreach($commands as $command => $value ) {
                     switch ( $command ) {
                         case 'color':
@@ -89,8 +79,22 @@ class Shout {
                             );
                             break;
                         case 'scale':
-                            $drawer->setFontSize(  );
+                            $drawer->setFontSize( (int)($value * $size)  );
                             break;
+                        case "rotate":
+                            $drawer->rotate($value[0]);
+                            $cos = cos(deg2rad($value[0])); $sin = sin(deg2rad($value[0]));
+                            $rx = $value[1] * $this->setting['width']; $ry = $value[2] * $this->setting['height'];
+                            $dx = $rx - $cos * $rx - $sin * $ry;
+                            $dy = $ry + $sin * $rx - $cos * $ry;
+                            break;
+                        case 'stroke-color':
+                            $drawer->setStrokeColor(new ImagickPixel($value));
+                            break;
+                        case 'stroke-width':
+                            $drawer->setStrokeWidth( $value );
+                            break;
+
                     }
                 }
 
@@ -98,22 +102,15 @@ class Shout {
                     $metrics = $layer->queryFontMetrics($drawer, $text);
 
                     $width = $metrics['textWidth'];
-                    $x = (int)(($this->setting['width'] - $width)/2 - $metrics['x1']);
+                    $x = (int)(($this->setting['width'] - $width)/2 - $metrics['boundingBox']['x1']);
 
                     //print_r(array('width'=>$width, 'x'=>$x, 'y'=>$y));
 
-                    $drawer->annotation( $x, $y + $height * $j, $text );
+                    $drawer->annotation( $x - $dx, $y - $dy + $height * $j, $text );
                     $layer->drawImage($drawer);
 
-                    foreach($commands as $command => $value ) {
-                        switch ( $command ) {
-                            case 'corate':
-                                $layer->rotateimage($this->base_color, $value);
-                                break;
-                        }
-                    }
-                    $this->layers[$i] = $layer;
                 }
+                $this->layers[$i] = $layer;
             }
 //header('Content-type: image/gif'); echo $this->layers[$i]->getImagesBlob();die;
             return $this;
@@ -129,11 +126,12 @@ class Shout {
     function finalise( ) {
         $output = new Imagick();
         $output->setFormat("gif");
-
+//        $output->setImageDispose(3);
         foreach( $this->layers as $layer ) {
             $layer->setImageDelay($this->setting['delay']);
-            $output->addImage($layer);
-        }
+            $layer->setImageDispose(3);
+            $output->addImage($layer); 
+       }
         return $output->getImagesBlob();
     }
 
@@ -196,7 +194,7 @@ class Shout {
                     $this_size = min($this_size, $size);
                     $this_height = max($height, $this_height);
                     $this_width = max( $width, $this_width);
-                    $this_y = $y;
+                    $this_y = $y;// + $metrics['acsender'];
                     break;
                 }
             }
