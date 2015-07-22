@@ -1,6 +1,8 @@
 {
 	"base":{
-		"font":5
+		"font":5,
+		"frame":[[0,0],[1,1]],
+		"delay":50
 	},
 	"layers":[
 		{

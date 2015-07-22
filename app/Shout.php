@@ -14,6 +14,7 @@ class Shout {
     private $draw_color;
 
     private $setting;
+    private $delay;
 
     /**
      * Constructor
@@ -26,6 +27,8 @@ class Shout {
     function __construct( $setting = 'default' ) {
 
         $this->setting = Config::get('image.' . $setting );
+
+        $delay = $this->setting['delay'];
 
         $this->base_color = new ImagickPixel( $this->setting['bg_color'] );
         $this->draw_color = new ImagickPixel( $this->setting['color'] );
@@ -44,12 +47,20 @@ class Shout {
 
     function drawString( $text, $def = 1 ) {
 
-        $text_array = $this->divideString($text);
         $definition = json_decode(
             file_get_contents($this->setting['font_base_dir'] . "/$def.def")
         );
 
+        $boundary = $definition->base->frame;
+        $this->delay = $definition->base->delay;
+
+        $frame_width = $boundary[1][0]-$boundary[0][0];
+        $frame_height = $boundary[1][0]-$boundary[0][0];
+
         $font = $definition->base->font;
+        $text_array = $this->divideString(
+            $text, $font, $frame_width, $frame_height);
+
         list($size, $max_width, $height, $y)
             = $this->getProperFontSize($text_array, $font);
 
@@ -100,28 +111,14 @@ class Shout {
 
                 foreach( $text_array as $j => $text ) {
                     $metrics = $layer->queryFontMetrics($drawer, $text);
-//echo $y;
-//print_r($metrics); die;
                     $width = $metrics['textWidth'];
                     $x = (int)(($this->setting['width'] - $width)/2 - $metrics['boundingBox']['x1']);
-/*
-$k = new ImagickDraw();
-$k->setfillcolor(new ImagickPixel("green"));
-$k->rectangle(
-    $x+$metrics['boundingBox']['x1'],
-    $y+$metrics['boundingBox']['y1'] - $metrics['descender'] + $height * $j,
-    $x+$metrics['boundingBox']['x2'],
-    $y+$metrics['boundingBox']['y1'] + $height - $metrics['descender'] + $height * $j);
-$layer->drawImage($k);
-;
-*/
                     $drawer->annotation( $x - $dx, $y - $dy + $metrics['ascender'] + $height * $j, $text );
                     $layer->drawImage($drawer);
 
                 }
                 $this->layers[$i] = $layer;
             }
-//header('Content-type: image/gif'); echo $this->layers[$i]->getImagesBlob();die;
             return $this;
         } catch ( Exception $e ) {
             print_r($e->getTrace()); die;
@@ -137,7 +134,7 @@ $layer->drawImage($k);
         $output->setFormat("gif");
 //        $output->setImageDispose(3);
         foreach( $this->layers as $layer ) {
-            $layer->setImageDelay($this->setting['delay']);
+            $layer->setImageDelay($this->delay);
             $layer->setImageDispose(3);
             $output->addImage($layer); 
        }
@@ -159,15 +156,100 @@ $layer->drawImage($k);
 
     }
 
-    private function divideString( $text ) {
-        $return = array();
-        if ( mb_strlen($text) > 0 ) {
-            $k = ceil(sqrt(mb_strlen($text)));
-            for ($i = 0; $i < mb_strlen($text); $i+=$k ) {
-                $return[(int)($i/$k)] = mb_substr($text, $i, $k);
+    private function isEnglish($text = null) {
+        if ( preg_match("/^[a-zA-Z0-9\.\?\!\(\)\[\]\/\%\&\#]+$/", $text) ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function tokenize( $text ) {
+        $length = mb_strlen($text);
+        $tokens = array("");
+        $index = 0;
+
+        for( $i = 0; $i < $length; $i++ ) {
+            $sub_str = mb_substr( $text, $i, 1);
+            if ( $tokens[$index] == "" || ( $this->isEnglish($tokens[$index])
+                && $this->isEnglish($sub_str) ) ) {
+                $tokens[$index] .= $sub_str;
+            } else {
+                $index++;
+                $tokens[$index] = trim($sub_str);
             }
         }
-        return $return;
+        return $tokens;
+    }
+
+
+    private function divideString( $text, $font, $width_border, $height_border ) {
+
+        $width_array = array();
+        $height = 0;
+
+        // Set up drawer for layer;
+
+        $drawer = (new ImagickDraw());
+        $drawer->setFont( $this->setting['font_base_dir']
+            . '/' . $this->setting['font'][$font] );
+        $drawer->setfontsize(50);
+
+        // Divide string into tokens
+
+        $tokens = $this->tokenize($text);
+
+        // White Space width
+        $metrics = $this->layers[0]
+            ->queryFontMetrics($drawer, "A A");
+        $width_space = $metrics['width'];
+        $metrics = $this->layers[0]
+            ->queryFontMetrics($drawer, "AA");
+        $width_space = $width_space - $metrics['width'];
+
+        $total_width = 0;
+
+        foreach( $tokens as $i => $token) {
+            $metrics = $this->layers[0]
+                ->queryFontMetrics($drawer, $token);
+            $width_array[$i] = $metrics['width'];
+
+            $total_width .= $metrics['width'];
+
+            if ( isset($tokens[$i-1])
+                && $this->isEnglish($tokens[$i-1])
+                && $this->isEnglish($token) )
+                $total_width .= $width_space;
+
+            $height = max($height, $metrics['ascender']-$metrics['descender']);
+        }
+
+        $pre_evaluated_line_count = ceil(sqrt(
+            $total_width / $height / $width_border * $height_border));
+        $proper_width = $total_width / $pre_evaluated_line_count;
+
+        $results = array("");
+        $current_width = 0;
+        $index = 0;
+        foreach( $tokens as $i => $token) {
+            if ( $current_width > $proper_width ) {
+                $index++;
+                $results[$index] = $token;
+                $current_width = $width_array[$i];
+            } else {
+                if ( isset( $tokens[$i-1])
+                    && $this->isEnglish($tokens[$i-1])
+                    && $this->isEnglish($token) ) {
+                    $results[$index] .= " ";
+                    $current_width .= $width_space;
+                    $results[$index] .= $token;
+                    $current_width .= $width_array[$i];
+                }
+            }
+        }
+        return $results;
+
+
     }
 
     private function getProperFontSize( $texts, $font ) {
