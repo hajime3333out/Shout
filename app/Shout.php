@@ -100,19 +100,22 @@ class Shout {
 
                 foreach( $text_array as $j => $text ) {
                     $metrics = $layer->queryFontMetrics($drawer, $text);
-
+//echo $y;
+//print_r($metrics); die;
                     $width = $metrics['textWidth'];
                     $x = (int)(($this->setting['width'] - $width)/2 - $metrics['boundingBox']['x1']);
-
+/*
 $k = new ImagickDraw();
 $k->setfillcolor(new ImagickPixel("green"));
 $k->rectangle(
-    $x-$dx+$metrics['boundingBox']['x1'],
-    $y-$dy+$metrics['boundingBox']['y1'],
-    $x-$dx+$metrics['boundingBox']['x2'],
-    $y-$dy+$metrics['boundingBox']['y2']);
-
-                    $drawer->annotation( $x - $dx, $y - $dy + $height * $j, $text );
+    $x+$metrics['boundingBox']['x1'],
+    $y+$metrics['boundingBox']['y1'] - $metrics['descender'] + $height * $j,
+    $x+$metrics['boundingBox']['x2'],
+    $y+$metrics['boundingBox']['y1'] + $height - $metrics['descender'] + $height * $j);
+$layer->drawImage($k);
+;
+*/
+                    $drawer->annotation( $x - $dx, $y - $dy + $metrics['ascender'] + $height * $j, $text );
                     $layer->drawImage($drawer);
 
                 }
@@ -191,10 +194,10 @@ $k->rectangle(
                     ->queryFontMetrics($drawer, $text);
 
 
-                $height = $metrics['textHeight'] * 1.03;
+                $height = ($metrics['ascender']-$metrics['descender']) * 1.03;
                 $width = $metrics['textWidth'] * 1.1;
                 $y = (int)(($this->setting['width'] -
-                            $height * count($texts))/2) + $metrics['ascender'];
+                            $height * count($texts))/2);
 
                 if ( $width < $this->setting['width'] && $y > 0 ) {
                     $this_size = min($this_size, $size);
@@ -207,7 +210,6 @@ $k->rectangle(
         }
 
         $result =  array( $this_size, (int)$this_width, (int)$this_height, (int)$this_y );
-print_r($result); die;
         return $result;
     }
 } 
