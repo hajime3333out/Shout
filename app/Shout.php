@@ -104,7 +104,13 @@ class Shout {
                     $width = $metrics['textWidth'];
                     $x = (int)(($this->setting['width'] - $width)/2 - $metrics['boundingBox']['x1']);
 
-                    //print_r(array('width'=>$width, 'x'=>$x, 'y'=>$y));
+$k = new ImagickDraw();
+$k->setfillcolor(new ImagickPixel("green"));
+$k->rectangle(
+    $x-$dx+$metrics['boundingBox']['x1'],
+    $y-$dy+$metrics['boundingBox']['y1'],
+    $x-$dx+$metrics['boundingBox']['x2'],
+    $y-$dy+$metrics['boundingBox']['y2']);
 
                     $drawer->annotation( $x - $dx, $y - $dy + $height * $j, $text );
                     $layer->drawImage($drawer);
