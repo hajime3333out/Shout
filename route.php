@@ -57,26 +57,23 @@ $html = <<<EOT
 <td>
 <div>
 <form method=get action="display">
-<input type="text" name="q" size=30 />
-<textarea name="style">
+
+<textarea name="style" cols="60" rows="10">
 $style
 </textarea>
 <br /><br />
+<input type="text" name="q" size=30 /><br />
 <input type="submit" value="go" />
-
 </form>
 </div>
 </td>
 <td>
 <div style='text-align: center; display:table-cell; background-position:center middle; vertical-align: middle; width:240px; height: 320px; background-image:url(http://d3gbrb95pfitbz.cloudfront.net/message_photo/1436241183_5447329.jpeg); margin:0px; padding:0px;background-size: cover;'>
-</td>
-</tr>
-</table>
 
 EOT;
 
     $style = urlencode($style);
-$html .= "<img width=240px src='image?style=$style&q=$string' /></div></body>";
+$html .= "<img width=240px src='image?style=$style&q=$string' /></div></td></tr></table></body>";
     return (new Response())->setContentType('text/html')->setContent($html);
 });
 
