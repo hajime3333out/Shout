@@ -47,9 +47,18 @@ class Shout {
 
     function drawString( $text, $def = 1 ) {
 
-        $definition = json_decode(
-            file_get_contents($this->setting['font_base_dir'] . "/$def.def")
-        );
+        if ( is_numeric($def)) {
+            $definition = json_decode(
+                file_get_contents($this->setting['font_base_dir'] . "/$def.def")
+            );
+        } else {
+            try {
+                $definition = json_decode($def);
+            } catch (\Exception $e ) {
+                $definition = json_decode(
+                    file_get_contents($this->setting['font_base_dir'] . "/1.def"));
+            }
+        }
 
         $boundary = $definition->base->frame;
         $this->delay = $definition->base->delay;
