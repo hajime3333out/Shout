@@ -202,24 +202,24 @@ class Shout {
         // White Space width
         $metrics = $this->layers[0]
             ->queryFontMetrics($drawer, "A A");
-        $width_space = $metrics['width'];
+        $width_space = $metrics['textWidth'];
         $metrics = $this->layers[0]
             ->queryFontMetrics($drawer, "AA");
-        $width_space = $width_space - $metrics['width'];
+        $width_space = $width_space - $metrics['textWidth'];
 
         $total_width = 0;
 
         foreach( $tokens as $i => $token) {
             $metrics = $this->layers[0]
-                ->queryFontMetrics($drawer, $token);
-            $width_array[$i] = $metrics['width'];
+                ->queryFontMetrics($drawer, $token); 
+            $width_array[$i] = $metrics['textWidth'];
 
-            $total_width .= $metrics['width'];
+            $total_width += $metrics['textWidth'];
 
             if ( isset($tokens[$i-1])
                 && $this->isEnglish($tokens[$i-1])
                 && $this->isEnglish($token) )
-                $total_width .= $width_space;
+                $total_width += $width_space;
 
             $height = max($height, $metrics['ascender']-$metrics['descender']);
         }
@@ -231,24 +231,25 @@ class Shout {
         $results = array("");
         $current_width = 0;
         $index = 0;
+
         foreach( $tokens as $i => $token) {
-            if ( $current_width > $proper_width ) {
+            if ( $current_width >= $proper_width ) {
                 $index++;
                 $results[$index] = $token;
                 $current_width = $width_array[$i];
-            } else {
-                if ( isset( $tokens[$i-1])
+            } else if ( isset( $tokens[$i-1] )
                     && $this->isEnglish($tokens[$i-1])
                     && $this->isEnglish($token) ) {
                     $results[$index] .= " ";
-                    $current_width .= $width_space;
+                    $current_width += $width_space;
                     $results[$index] .= $token;
-                    $current_width .= $width_array[$i];
-                }
+                    $current_width += $width_array[$i];
+            } else {
+                $current_width += $width_array[$i]; 
+                $results[$index] .= $token;
             }
         }
         return $results;
-
 
     }
 
