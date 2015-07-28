@@ -38,6 +38,8 @@ $html .= "<img width=240px src='image?f=1&q=$string' /></div></body>";
     return (new Response())->setContentType('text/html')->setContent($html);
 });
 
+require 'route_editor.php';
+
 Route::get('/', function(){
     return (new Response())
         ->setContentType('image/gif')
