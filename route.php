@@ -54,11 +54,11 @@ EOF;
 $html = <<<EOT
 <body style='text-align: left;'>
 <table><tr>
-<td>
+<td valign=top>
 <div>
 <form method=get action="display">
 
-<textarea name="style" cols="60" rows="10">
+<textarea name="style" cols="60" rows="30">
 $style
 </textarea>
 <br /><br />
@@ -67,13 +67,15 @@ $style
 </form>
 </div>
 </td>
-<td>
-<div style='text-align: center; display:table-cell; background-position:center middle; vertical-align: middle; width:240px; height: 320px; background-image:url(http://d3gbrb95pfitbz.cloudfront.net/message_photo/1436241183_5447329.jpeg); margin:0px; padding:0px;background-size: cover;'>
+<td valign=top>
+<div style='text-align: center; display:table-cell;
+background-position:center middle; vertical-align: middle;
+width:480px; height: 640px; background-image:url(http://d3gbrb95pfitbz.cloudfront.net/message_photo/1436241183_5447329.jpeg); margin:0px; padding:0px;background-size: cover;'>
 
 EOT;
 
     $style = urlencode($style);
-$html .= "<img width=240px src='image?style=$style&q=$string' /></div></td></tr></table></body>";
+$html .= "<img width=480px src='image?style=$style&q=$string' /></div></td></tr></table></body>";
     return (new Response())->setContentType('text/html')->setContent($html);
 });
 
