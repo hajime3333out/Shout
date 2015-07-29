@@ -288,7 +288,7 @@ class Shout {
 
                 $height = ($metrics['ascender']-$metrics['descender']) * 1.03;
                 $width = $metrics['textWidth'] * 1.1;
-                $y = (int)(($this->setting['width'] -
+                $y = (int)(($this->setting['height'] -
                             $height * count($texts))/2);
 
                 if ( $width < $this->setting['width'] && $y > 0 ) {
